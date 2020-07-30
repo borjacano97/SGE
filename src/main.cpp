@@ -3,13 +3,26 @@
 #include <cstdint>
 #define SDL_MAIN_HANDLED
 #include <SDL2/SDL.h>
+#include "math/Vec2.hpp"
+
+struct Player
+{
+	Vec2f pos;
+	Vec2f dir;
+	float vel;
+	
+	int w, h;
+};
+
+const size_t window_width = 720;
+const size_t window_height= 640;
 
 int main(int argc, const char* argv[])
 {
 	SDL_Init(SDL_INIT_EVERYTHING);
 
-	SDL_Window* window = SDL_CreateWindow("Motor bien perron", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, 720, 640, 0);
-	SDL_Renderer* renderer = SDL_CreateRenderer(window,-1, 0);
+	SDL_Window* window		= SDL_CreateWindow("Motor bien perron", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, window_width, window_height, 0);
+	SDL_Renderer* renderer	= SDL_CreateRenderer(window,-1, 0);
 	
 	bool run = true;
 
@@ -22,15 +35,30 @@ int main(int argc, const char* argv[])
 	
 	Color colors[] = 
 	{
-		{0xff0000ff},
-		{0x00ff00ff},
-		{0x0000ffff},
-		{0xff00ffff}
+		{0xff0000ffu},
+		{0x00ff00ffu},
+		{0x0000ffffu},
+		{0xff00ffffu}
 	};
 	const size_t n_colors = sizeof(colors) / sizeof(*colors);
 	size_t current_color = 0;
+	char n = 0;
+
+	SDL_SetRenderDrawColor(renderer, 0, 0, 0, 0);
+	Player player
+	{
+		{window_width / 2 - 50, window_height / 2 - 50},
+		{1, 0},
+		50,
+		50, 50
+	};
+	auto last_time = SDL_GetTicks();
 	while (run)
 	{
+		const auto now = SDL_GetTicks();
+		const auto delta_time = (now - last_time) * 0.001;
+		last_time = now;
+		
 		// Handle events
 		SDL_Event e;
 		while (SDL_PollEvent(&e))
@@ -39,11 +67,10 @@ int main(int argc, const char* argv[])
 			else if (e.type == SDL_KEYDOWN)
 			{
 				const auto sym = e.key.keysym.sym;
-				char c;
 				if ((sym >= SDLK_0 && sym <= SDLK_9)
 				||  (sym >= SDLK_a && sym <= SDLK_z))
 				{
-					std::cout << (char)sym;
+					std::cout << static_cast<char>(sym);
 				}
 				else if(sym == SDLK_SPACE)
 				{
@@ -52,11 +79,27 @@ int main(int argc, const char* argv[])
 			}
 		}
 		// Update
-		const auto render_color = colors[current_color];
+		Vec2f next_pos = player.pos + player.dir * player.vel * delta_time;
+		if (next_pos.x + player.w / 2 > window_width)
+			player.dir.x *= -1;
+		else if (next_pos.x - player.w / 2 < 0)
+			player.dir.x *= -1;
+		
+		player.pos = next_pos;
+		
 		// Render
-		SDL_SetRenderDrawColor(renderer, render_color.r, render_color.g, render_color.b, render_color.a);
+		SDL_Rect rect
+		{
+			(int)player.pos.x - (player.w/2),
+			(int)player.pos.y - (player.h/2),
+			player.w,
+			player.h
+		};
+		SDL_SetRenderDrawColor(renderer, 0, 0, 0, 0);
 		SDL_RenderClear(renderer);
-
+		
+		SDL_SetRenderDrawColor(renderer, 255, 0, 0, 255);
+		SDL_RenderDrawRect(renderer, &rect);
 
 		SDL_RenderPresent(renderer);
 	}

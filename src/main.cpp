@@ -76,6 +76,44 @@ int main(int argc, const char* argv[])
 				{
 					current_color = (current_color + 1) % n_colors;
 				}
+				bool dirty = false;
+				if (sym == SDLK_UP)
+				{
+					dirty = true;
+					player.dir.y = -1;
+				}
+				else if (sym == SDLK_DOWN)
+				{
+					dirty = true;
+					player.dir.y = 1;
+				}
+				if (sym == SDLK_RIGHT)
+				{
+					dirty = true;
+					player.dir.x = 1;
+				}
+				else if (sym == SDLK_LEFT)
+				{
+					dirty = true;
+					player.dir.x = -1;
+				}
+				if (dirty) player.dir.normalize();
+			}
+			else if(e.type == SDL_KEYUP)
+			{
+				const auto sym = e.key.keysym.sym;
+				bool dirty = false;
+				if ((sym == SDLK_UP && player.dir.y < 0) || (sym == SDLK_DOWN && player.dir.y > 0))
+				{
+					player.dir.y = 0;
+					dirty = true;
+				}
+				if ((sym == SDLK_RIGHT && player.dir.x > 0) || (sym == SDLK_LEFT && player.dir.x < 0))
+				{	
+					player.dir.x = 0;
+					dirty = true;
+				}
+				if (dirty) player.dir.normalize();
 			}
 		}
 		// Update
@@ -101,6 +139,9 @@ int main(int argc, const char* argv[])
 		SDL_SetRenderDrawColor(renderer, 255, 0, 0, 255);
 		SDL_RenderDrawRect(renderer, &rect);
 
+		const float ray_len = 100;
+		const Vec2f dir_ray = player.pos + player.dir * ray_len;
+		SDL_RenderDrawLine(renderer, player.pos.x, player.pos.y, dir_ray.x, dir_ray.y);
 		SDL_RenderPresent(renderer);
 	}
 	

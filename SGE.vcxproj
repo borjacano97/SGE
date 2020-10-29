@@ -153,12 +153,18 @@
   <ItemGroup>
     <ClCompile Include="src\core\App.cpp" />
     <ClCompile Include="src\core\Time.cpp" />
+    <ClCompile Include="src\input\InputSDL.cpp" />
     <ClCompile Include="src\main.cpp" />
+    <ClCompile Include="src\render\RendererSDL.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\core\App.h" />
     <ClInclude Include="src\core\Time.h" />
+    <ClInclude Include="src\input\Input.h" />
+    <ClInclude Include="src\input\InputSDL.h" />
     <ClInclude Include="src\math\Vec2.hpp" />
+    <ClInclude Include="src\render\renderer.h" />
+    <ClInclude Include="src\render\RendererSDL.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

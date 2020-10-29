@@ -2,14 +2,10 @@
 
 #include <iostream>
 #include <fmt/format.h>
+#include <SDL2/SDL.h>
 
 #include "Time.h"
 
-union Color
-{
-	int32_t abgr;
-	struct { char a, b, g, r; };
-};
 
 static const Color colors[] =
 {
@@ -23,12 +19,7 @@ static const size_t n_colors = sizeof(colors) / sizeof(*colors);
 void App::Init()
 {
 	Time::StartTime();
-
-	SDL_Init(SDL_INIT_EVERYTHING);
-
-	window   = SDL_CreateWindow("Motor bien perron", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, window_width, window_height, 0);
-	renderer = SDL_CreateRenderer(window, -1, 0);
-	SDL_SetRenderDrawColor(renderer, 0, 0, 0, 0);
+	renderer.Init();
 
 	player = {
 		{window_width / 2 - 50, window_height / 2 - 50},
@@ -42,7 +33,6 @@ void App::Init()
 void App::Start()
 {
 	running = true;
-	auto last_time = SDL_GetTicks();
 	while (running)
 	{
 		Time::StartFrame();
@@ -133,28 +123,21 @@ void App::Update()
 	player.pos = next_pos;
 
 	// Render
-	SDL_Rect rect
-	{
-		(int)player.pos.x - (player.w / 2),
-		(int)player.pos.y - (player.h / 2),
-		player.w,
-		player.h
-	};
-	SDL_SetRenderDrawColor(renderer, 0, 0, 0, 0);
-	SDL_RenderClear(renderer);
+	
+	renderer.BeginFrame();
 
-	SDL_SetRenderDrawColor(renderer, 255, 0, 0, 255);
-	SDL_RenderDrawRect(renderer, &rect);
+	Vec2f player_center = { player.pos.x - (player.w / 2), player.pos.y - (player.h / 2) };
+
+	renderer.DrawRect(player_center, player.w, player.h);
 
 	const float ray_len = 100;
 	const Vec2f dir_ray = player.pos + player.dir * ray_len;
-	SDL_RenderDrawLine(renderer, player.pos.x, player.pos.y, dir_ray.x, dir_ray.y);
-	SDL_RenderPresent(renderer);
+	renderer.DrawLine({ player.pos.x, player.pos.y }, { dir_ray.x, dir_ray.y });
+
+	renderer.EndFrame();
 }
 
 void App::Cleanup()
 {
-	SDL_DestroyRenderer(renderer);
-	SDL_DestroyWindow(window);
-	SDL_Quit();
+	renderer.Cleanup();
 }

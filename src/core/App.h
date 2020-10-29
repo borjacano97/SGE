@@ -1,7 +1,8 @@
 #pragma once
-#include <SDL2/SDL.h>
 
 #include "../math/Vec2.hpp"
+
+#include "../render/renderer.h"
 
 struct Player
 {
@@ -18,8 +19,7 @@ const size_t window_height = 640;
 class App 
 {
 	bool running;
-	SDL_Window* window;
-	SDL_Renderer* renderer;
+	Renderer renderer;
 	Player player;
 	size_t current_color;
 public:
